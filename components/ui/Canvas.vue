@@ -1,24 +1,24 @@
 <template lang="pug">
-.w-full.height-full.overflow-hidden(@contextmenu.prevent="onContextMenu")
-  #canvas(
-    :style="containerStyles"
-    ref="canvas"
-  )
-  u-context-menu(
-    v-model="isContextMenuOpen"
-    :virtual-element="virtualElement"
-    :ui="{ transition: { enterActiveClass: 'transition-none', enterFromClass: 'transition-none', enterToClass: 'transition-none', leaveActiveClass: 'transition-none', leaveFromClass: 'transition-none', leaveToClass: 'transition-none' } }"
-  )
-    u-vertical-navigation(
-      :links="contextMenuLinks"
-      :ui="{ size: 'text-xs', font: 'font-normal' }"
+  .w-full.height-full.overflow-hidden(@contextmenu.prevent="onContextMenu")
+    #canvas(
+      :style="containerStyles"
+      ref="canvas"
     )
+    u-context-menu(
+      v-model="isContextMenuOpen"
+      :virtual-element="virtualElement"
+      :ui="{ transition: { enterActiveClass: 'transition-none', enterFromClass: 'transition-none', enterToClass: 'transition-none', leaveActiveClass: 'transition-none', leaveFromClass: 'transition-none', leaveToClass: 'transition-none' } }"
+    )
+      u-vertical-navigation(
+        :links="contextMenuLinks"
+        :ui="{ size: 'text-xs', font: 'font-normal' }"
+      )
 </template>
 
 <script>
 import Konva from 'konva'
-import { useLocalStorage, useMouse, useWindowScroll } from '@vueuse/core'
-import { mapState, mapActions } from 'pinia'
+import {useLocalStorage, useMouse, useWindowScroll} from '@vueuse/core'
+import {mapState, mapActions} from 'pinia'
 
 const BORDER_WIDTH = 1
 
@@ -27,16 +27,22 @@ export default {
   setup() {
     const tool = useLocalStorage('reflux-tool', 'V')
     const canvasState = useLocalStorage('reflux-canvas-state-test', {
-      stagePosition: { x: 0, y: 0 },
-      stageScale: { x: 1, y: 1 }
+      stagePosition: {x: 0, y: 0},
+      stageScale: {x: 1, y: 1}
     })
 
-    const moveTransformerNodesRef = ref(() => {})
-    const copyTransformerNodesRef = ref(() => {})
-    const copyTransformerNodesUrlRef = ref(() => {})
-    const pasteTransformerNodesRef = ref(() => {})
-    const deleteTransformerNodesRef = ref(() => {})
-    const downloadTransformerNodesRef = ref(() => {})
+    const moveTransformerNodesRef = ref(() => {
+    })
+    const copyTransformerNodesRef = ref(() => {
+    })
+    const copyTransformerNodesUrlRef = ref(() => {
+    })
+    const pasteTransformerNodesRef = ref(() => {
+    })
+    const deleteTransformerNodesRef = ref(() => {
+    })
+    const downloadTransformerNodesRef = ref(() => {
+    })
 
     // Add keypress handler
     onKeyStroke('Backspace', (e) => {
@@ -74,12 +80,12 @@ export default {
     })
 
     // Setup context menu
-    const { x, y } = useMouse()
-    const { y: windowY } = useWindowScroll()
+    const {x, y} = useMouse()
+    const {y: windowY} = useWindowScroll()
 
-    const { metaSymbol } = useShortcuts()
+    const {metaSymbol} = useShortcuts()
     const isContextMenuOpen = ref(false)
-    const virtualElement = ref({ getBoundingClientRect: () => ({}) })
+    const virtualElement = ref({getBoundingClientRect: () => ({})})
 
     function onContextMenu(e) {
       const top = unref(y) - unref(windowY)
@@ -131,7 +137,7 @@ export default {
     containerStyles() {
       return {
         cursor:
-          this.tool === 'V' ? 'default' : this.isDragging ? 'grabbing' : 'grab'
+            this.tool === 'V' ? 'default' : this.isDragging ? 'grabbing' : 'grab'
       }
     },
     contextMenuLinks() {
@@ -151,30 +157,30 @@ export default {
 
       if (this.selection.nodes.length > 0) {
         manipulationLinks.push(
-          {
-            label: 'Cut',
-            badge: `${this.metaSymbol} X`,
-            click: () => {
-              this.copyTransformerNodes(true)
-              this.isContextMenuOpen = false
+            {
+              label: 'Cut',
+              badge: `${this.metaSymbol} X`,
+              click: () => {
+                this.copyTransformerNodes(true)
+                this.isContextMenuOpen = false
+              }
+            },
+            {
+              label: 'Copy',
+              badge: `${this.metaSymbol} C`,
+              click: () => {
+                this.copyTransformerNodes()
+                this.isContextMenuOpen = false
+              }
+            },
+            {
+              label: 'Delete',
+              badge: '⌫',
+              click: () => {
+                this.deleteTransformerNodes()
+                this.isContextMenuOpen = false
+              }
             }
-          },
-          {
-            label: 'Copy',
-            badge: `${this.metaSymbol} C`,
-            click: () => {
-              this.copyTransformerNodes()
-              this.isContextMenuOpen = false
-            }
-          },
-          {
-            label: 'Delete',
-            badge: '⌫',
-            click: () => {
-              this.deleteTransformerNodes()
-              this.isContextMenuOpen = false
-            }
-          }
         )
 
         copyLinks.push({
@@ -188,38 +194,38 @@ export default {
         })
 
         movementLinks.push(
-          {
-            label: 'Move Forward',
-            badge: ']',
-            click: () => {
-              this.moveTransformerNodes('up', false)
-              this.isContextMenuOpen = false
+            {
+              label: 'Move Forward',
+              badge: ']',
+              click: () => {
+                this.moveTransformerNodes('up', false)
+                this.isContextMenuOpen = false
+              }
+            },
+            {
+              label: 'Send Backward',
+              badge: ']',
+              click: () => {
+                this.moveTransformerNodes('down', false)
+                this.isContextMenuOpen = false
+              }
+            },
+            {
+              label: 'Bring to Front',
+              badge: '⇧ ]',
+              click: () => {
+                this.moveTransformerNodes('up', true)
+                this.isContextMenuOpen = false
+              }
+            },
+            {
+              label: 'Send to Back',
+              badge: '⇧ [',
+              click: () => {
+                this.moveTransformerNodes('down', true)
+                this.isContextMenuOpen = false
+              }
             }
-          },
-          {
-            label: 'Send Backward',
-            badge: ']',
-            click: () => {
-              this.moveTransformerNodes('down', false)
-              this.isContextMenuOpen = false
-            }
-          },
-          {
-            label: 'Bring to Front',
-            badge: '⇧ ]',
-            click: () => {
-              this.moveTransformerNodes('up', true)
-              this.isContextMenuOpen = false
-            }
-          },
-          {
-            label: 'Send to Back',
-            badge: '⇧ [',
-            click: () => {
-              this.moveTransformerNodes('down', true)
-              this.isContextMenuOpen = false
-            }
-          }
         )
 
         downloadLinks.push({
@@ -287,8 +293,8 @@ export default {
       if (this.tool === 'V') {
         // Check if the target is a transformer handle
         if (
-          e.target.getParent() &&
-          e.target.getParent().className === 'Transformer'
+            e.target.getParent() &&
+            e.target.getParent().className === 'Transformer'
         ) {
           return // Exit early if it's a transformer handle
         }
@@ -327,8 +333,8 @@ export default {
             }
           } else if (metaPressed) {
             const nodes = this.transformer
-              .nodes()
-              .filter((node) => node !== topGroup)
+                .nodes()
+                .filter((node) => node !== topGroup)
             this.setTransformerNodes(nodes)
           }
         }
@@ -349,20 +355,20 @@ export default {
         const groups = this.stage.find('.output').filter((group) => {
           // Exclude selection rectangle, transformer, and its handlers
           return (
-            !(group instanceof Konva.Transformer) &&
-            group.getParent().className !== 'Transformer'
+              !(group instanceof Konva.Transformer) &&
+              group.getParent().className !== 'Transformer'
           )
         })
         const box = this.selection.rect.getClientRect()
         const selected = groups.filter((group) =>
-          Konva.Util.haveIntersection(box, group.getClientRect())
+            Konva.Util.haveIntersection(box, group.getClientRect())
         )
 
         const metaPressed = e.evt.shiftKey || e.evt.ctrlKey || e.evt.metaKey
         if (metaPressed) {
           const currentNodes = this.transformer.nodes()
           const newNodes = selected.filter(
-            (group) => !currentNodes.includes(group)
+              (group) => !currentNodes.includes(group)
           )
           this.setTransformerNodes(currentNodes.concat(newNodes))
         } else {
@@ -395,7 +401,7 @@ export default {
       e.evt.preventDefault()
 
       const stage = e.target.getStage()
-      const position = { x: stage.x(), y: stage.y() }
+      const position = {x: stage.x(), y: stage.y()}
 
       // Zooming
       if (e.evt.ctrlKey) {
@@ -410,12 +416,12 @@ export default {
         }
 
         let newScale =
-          e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy
+            e.evt.deltaY < 0 ? oldScale * scaleBy : oldScale / scaleBy
 
         // Clamp the scale between minZoom and maxZoom
         newScale = Math.max(minZoom, Math.min(newScale, maxZoom))
 
-        stage.scale({ x: newScale, y: newScale })
+        stage.scale({x: newScale, y: newScale})
 
         // Update stroke width only for .outputs with non-zero strokeWidth
         this.stage.find('.output').forEach((group) => {
@@ -426,9 +432,9 @@ export default {
         })
 
         position.x =
-          -(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale
+            -(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale
         position.y =
-          -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale
+            -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale
 
         // Panning
       } else {
@@ -461,9 +467,9 @@ export default {
     },
     hasOutputGroupChanged(group, output) {
       return (
-        group.width() !== output.metadata.width ||
-        group.height() !== output.metadata.height ||
-        group.getAttr('status') !== output.status
+          group.width() !== output.metadata.width ||
+          group.height() !== output.metadata.height ||
+          group.getAttr('status') !== output.status
       )
     },
     updateCanvas() {
@@ -586,6 +592,12 @@ export default {
       })
     },
     updateOutputGroup(group, output) {
+      console.log('--- Updating output group:', {
+        id: output.id,
+        status: output.status,
+        hasOutput: !!output.output
+      })
+
       group.setAttrs({
         x: output.metadata.x,
         y: output.metadata.y,
@@ -610,8 +622,11 @@ export default {
       }
 
       if (output.status === 'succeeded' && output.output && output.output[0]) {
+        console.log('--- Loading image from:', output.output[0])
+
         const img = new Image()
         img.onload = () => {
+          console.log('--- Image loaded successfully')
           const imageShape = new Konva.Image({
             image: img,
             width: output.metadata.width,
@@ -623,17 +638,14 @@ export default {
           this.updateBorder(group)
           this.layer.batchDraw()
         }
-        img.onerror = () => {
+        img.onerror = (error) => {
+          console.error('--- Error loading image:', error)
           this.createPlaceholder(group, 'Error loading image')
         }
         img.src = output.output[0]
       } else {
+        console.log('--- Creating placeholder with status:', output.status)
         this.createPlaceholder(group, output.status)
-      }
-
-      // Update the transformer if this group is selected
-      if (this.transformer.nodes().includes(group)) {
-        this.transformer.forceUpdate()
       }
     },
     createPlaceholder(group, status) {
@@ -706,7 +718,7 @@ export default {
         const prediction_id = output?.metadata?.prediction_id
         if (prediction_id) {
           navigator.clipboard.writeText(
-            `https://replicate.com/p/${prediction_id}`
+              `https://replicate.com/p/${prediction_id}`
           )
         }
       }
@@ -740,14 +752,14 @@ export default {
       }, {})
 
       const offsetX =
-        relativeMousePos.x - (boundingBox.minX + boundingBox.maxX) / 2
+          relativeMousePos.x - (boundingBox.minX + boundingBox.maxX) / 2
       const offsetY =
-        relativeMousePos.y - (boundingBox.minY + boundingBox.maxY) / 2
+          relativeMousePos.y - (boundingBox.minY + boundingBox.maxY) / 2
 
       const newOutputs = this.clipboard.map((item) => {
         const newId = `output-${item.id}-${Date.now()}-${Math.random()
-          .toString(36)
-          .substring(2, 9)}`
+            .toString(36)
+            .substring(2, 9)}`
         return {
           ...item,
           id: newId,
@@ -766,7 +778,7 @@ export default {
       this.setTransformerNodes([])
       this.$nextTick(() => {
         const newNodes = newOutputs.map((output) =>
-          this.stage.findOne(`#${output.id}`)
+            this.stage.findOne(`#${output.id}`)
         )
         this.setTransformerNodes(newNodes)
       })
@@ -830,7 +842,7 @@ export default {
           for (let i = 0; i < byteString.length; i++) {
             ia[i] = byteString.charCodeAt(i)
           }
-          const blob = new Blob([ab], { type: mimeString })
+          const blob = new Blob([ab], {type: mimeString})
 
           // Create download link and trigger download
           const url = URL.createObjectURL(blob)
@@ -929,8 +941,8 @@ export default {
               return
             }
 
-            const { snap, offset } = snappingEdge
-            result.push({ snapLine, diff, snap, offset })
+            const {snap, offset} = snappingEdge
+            result.push({snapLine, diff, snap, offset})
           })
         })
         return result
@@ -941,8 +953,8 @@ export default {
 
       const closestSnapLines = []
 
-      const getSnapLine = ({ snapLine, offset, snap }, orientation) => {
-        return { snapLine, offset, orientation, snap }
+      const getSnapLine = ({snapLine, offset, snap}, orientation) => {
+        return {snapLine, offset, orientation, snap}
       }
 
       // Get up to 3 closest vertical and horizontal snapping lines
@@ -958,7 +970,7 @@ export default {
       const stageScale = this.stage.scaleX()
 
       lines.forEach((l) => {
-        const { start, end } = this.calculateLineEndpoints(l)
+        const {start, end} = this.calculateLineEndpoints(l)
 
         if (l.orientation === 'H') {
           const line = new Konva.Line({
@@ -995,7 +1007,7 @@ export default {
       }
 
       if (line.orientation === 'V') {
-        start = transformPoint({ x: line.snapLine, y: selectedBox.y })
+        start = transformPoint({x: line.snapLine, y: selectedBox.y})
         end = transformPoint({
           x: line.snapLine,
           y: selectedBox.y + selectedBox.height
@@ -1005,20 +1017,20 @@ export default {
           if (!selectedNodes.includes(shape)) {
             const box = shape.getClientRect()
             if (
-              Math.abs(box.x - line.snapLine) < 1 ||
-              Math.abs(box.x + box.width - line.snapLine) < 1 ||
-              Math.abs(box.x + box.width / 2 - line.snapLine) < 1
+                Math.abs(box.x - line.snapLine) < 1 ||
+                Math.abs(box.x + box.width - line.snapLine) < 1 ||
+                Math.abs(box.x + box.width / 2 - line.snapLine) < 1
             ) {
-              start.y = Math.min(start.y, transformPoint({ x: 0, y: box.y }).y)
+              start.y = Math.min(start.y, transformPoint({x: 0, y: box.y}).y)
               end.y = Math.max(
-                end.y,
-                transformPoint({ x: 0, y: box.y + box.height }).y
+                  end.y,
+                  transformPoint({x: 0, y: box.y + box.height}).y
               )
             }
           }
         })
       } else {
-        start = transformPoint({ x: selectedBox.x, y: line.snapLine })
+        start = transformPoint({x: selectedBox.x, y: line.snapLine})
         end = transformPoint({
           x: selectedBox.x + selectedBox.width,
           y: line.snapLine
@@ -1028,21 +1040,21 @@ export default {
           if (!selectedNodes.includes(shape)) {
             const box = shape.getClientRect()
             if (
-              Math.abs(box.y - line.snapLine) < 1 ||
-              Math.abs(box.y + box.height - line.snapLine) < 1 ||
-              Math.abs(box.y + box.height / 2 - line.snapLine) < 1
+                Math.abs(box.y - line.snapLine) < 1 ||
+                Math.abs(box.y + box.height - line.snapLine) < 1 ||
+                Math.abs(box.y + box.height / 2 - line.snapLine) < 1
             ) {
-              start.x = Math.min(start.x, transformPoint({ x: box.x, y: 0 }).x)
+              start.x = Math.min(start.x, transformPoint({x: box.x, y: 0}).x)
               end.x = Math.max(
-                end.x,
-                transformPoint({ x: box.x + box.width, y: 0 }).x
+                  end.x,
+                  transformPoint({x: box.x + box.width, y: 0}).x
               )
             }
           }
         })
       }
 
-      return { start, end }
+      return {start, end}
     },
     handleDragMove(e) {
       // clear all previous lines on the screen
@@ -1057,8 +1069,8 @@ export default {
       const possibleSnappingLines = this.getSnapLines(selectedNodes)
       const selectedShapeSnappingEdges = this.getShapeSnappingEdges()
       const closestSnapLines = this.getClosestSnapLines(
-        possibleSnappingLines,
-        selectedShapeSnappingEdges
+          possibleSnappingLines,
+          selectedShapeSnappingEdges
       )
       // Do nothing if no snapping lines
       if (closestSnapLines.length === 0) {

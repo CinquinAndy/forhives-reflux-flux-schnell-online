@@ -1,25 +1,29 @@
 export default defineEventHandler(async (event) => {
   try {
-    const { replicate_api_token, version, input } = await readBody(event)
+    const body = await readBody(event)
+    console.log('--- Prediction request:', {
+      version: body.version,
+      input: body.input
+    })
 
     const result = await fetch('https://api.replicate.com/v1/predictions', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${replicate_api_token}`,
+        Authorization: `Bearer ${body.replicate_api_token}`,
         'User-Agent': 'ReFlux/1.0'
       },
       body: JSON.stringify({
-        version,
-        input
+        version: body.version,
+        input: body.input
       })
     })
 
     const prediction = await result.json()
+    console.log('--- Replicate API response:', prediction)
 
     return prediction
   } catch (e) {
-    console.log('--- error (api/prediction): ', e)
-
+    console.error('--- error (api/prediction):', e.message, e)
     return {
       error: e.message
     }
