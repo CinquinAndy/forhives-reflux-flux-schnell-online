@@ -21,6 +21,11 @@
     //- Status indicator
     .absolute.bottom-2.left-2(v-if="output.status !== 'succeeded'")
       u-badge(:color="statusColor") {{ output.status }}
+
+    //- Info section
+    .p-3.border-t
+      .text-xs.text-gray-500 {{ output.input.prompt }}
+      .text-xs.text-gray-400.mt-1 Ratio: {{ output.input.aspect_ratio }}
 </template>
 
 <script>
@@ -82,6 +87,10 @@ export default {
       }
     }
   },
+  data: () => ({
+    stage: null,
+    layer: null
+  }),
   methods: {
     initCanvas() {
       const container = this.$refs[`canvas-${this.output.id}`]
@@ -140,30 +149,45 @@ export default {
         img.src = this.output.output
       }
       this.layer.batchDraw()
-    }
-  },
-  downloadImage() {
-    if (!this.output.output) return
+    },
+    downloadImage() {
+      if (!this.output.output) return
 
-    const link = document.createElement('a')
-    link.href = this.output.output
-    link.download = `image-${this.output.id}.${this.output.output.split('.').pop()}`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+      const link = document.createElement('a')
+      link.href = this.output.output
+      link.download = `image-${this.output.id}.${this.output.output.split('.').pop()}`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    },
+    handleResize() {
+      if (!this.stage) return
+
+      const container = this.$refs[`canvas-${this.output.id}`]
+      if (!container) return
+
+      // Mettre à jour les dimensions du stage
+      this.stage.width(container.offsetWidth)
+      this.stage.height(container.offsetHeight)
+
+      // Forcer la mise à jour du canvas
+      this.updateCanvas()
+    }
   },
   watch: {
     'output.output'() {
       this.updateCanvas()
-    }
-    ,
+    },
     'output.status'() {
       this.updateCanvas()
     }
-  }
-  ,
+  },
   mounted() {
     this.initCanvas()
+    window.addEventListener('resize', this.handleResize)
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.handleResize)
   }
 }
 </script>
