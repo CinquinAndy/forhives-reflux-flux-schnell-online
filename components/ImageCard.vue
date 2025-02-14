@@ -8,7 +8,17 @@
       )
 
     //- Download button
-    .absolute.top-2.right-2
+    .absolute.top-2.right-2.gap-2.flex
+      //- Delete button
+      //  with hover in pug langage
+      u-button(
+        class="opacity-50 hover:opacity-100"
+        @click="deleteImage"
+        color="red"
+        variant="solid"
+        icon="i-heroicons-trash"
+        size="xs"
+      )
       u-button(
         @click="downloadImage"
         color="white"
@@ -29,6 +39,7 @@
 </template>
 
 <script>
+import {mapActions} from 'pinia'
 import Konva from 'konva'
 
 export default {
@@ -100,6 +111,10 @@ export default {
     layer: null
   }),
   methods: {
+    ...mapActions(usePredictionStore, ['removeOutput']),
+    deleteImage() {
+      this.removeOutput(this.output.id)
+    },
     initCanvas() {
       const container = this.$refs[`canvas-${this.output.id}`]
       if (!container) return
