@@ -15,10 +15,16 @@
 </template>
 
 <script>
+import {mapState} from 'pinia'
+import {usePredictionStore} from '~/stores/prediction'
+import ImageCard from '~/components/ImageCard.vue'
+import PredictionPoller from '~/components/PredictionPoller.vue'
+
 export default {
   name: 'index',
   components: {
-    ImageCard
+    ImageCard,
+    PredictionPoller
   },
   computed: {
     ...mapState(usePredictionStore, ['outputs']),
