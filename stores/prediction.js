@@ -93,60 +93,51 @@ export const usePredictionStore = defineStore('predictionStore', {
 
                 console.log('--- Valid prediction IDs for polling:', prediction_ids)
 
-                // Changement ici : stockons la réponse dans une constante avant de l'utiliser
-                const response = await $fetch(
-                    `/api/prediction?ids=${prediction_ids.join(',')}&token=${this.replicate_api_token}`
-                )
+                // Récupérer les prédictions de l'API
+                const pollUrl = `/api/prediction?ids=${prediction_ids.join(',')}&token=${this.replicate_api_token}`
+                const pollResponse = await $fetch(pollUrl)
 
-                if (!response || response.error) {
-                    console.error('--- Polling error:', response?.error || 'No response')
+                if (!pollResponse || pollResponse.error) {
+                    console.error('--- Polling error:', pollResponse?.error || 'No response')
                     return
                 }
 
-                // Vérifions que response est un tableau
-                const predictions = Array.isArray(response) ? response : [response]
-                console.log('--- Poll response:', predictions)
+                // Important: on définit la variable avant de l'utiliser
+                let predictionsToProcess = Array.isArray(pollResponse) ? pollResponse : [pollResponse]
+                console.log('--- Poll response:', predictionsToProcess)
 
-                for (const prediction of predictions) {
-                    // Vérifions que la prédiction est valide
+                // On utilise la variable définie au-dessus
+                for (const prediction of predictionsToProcess) {
                     if (!prediction || !prediction.id) continue
 
-                    const targets = this.outputs.filter(
-                        (i) => i?.metadata?.prediction_id === prediction.id
+                    // Trouver les outputs correspondants
+                    const outputsToUpdate = this.outputs.filter(
+                        output => output?.metadata?.prediction_id === prediction.id
                     )
-                    console.log('--- Updating targets:', targets)
 
-                    for (const target of targets) {
-                        const index = this.outputs.findIndex((i) => i.id === target.id)
-                        if (index !== -1) {
-                            // Création d'une copie de l'output existant
-                            const baseOutput = {...this.outputs[index]}
+                    // Mettre à jour chaque output
+                    for (const output of outputsToUpdate) {
+                        const outputIndex = this.outputs.findIndex(o => o.id === output.id)
+                        if (outputIndex === -1) continue
 
-                            // Création du nouvel output avec les données mises à jour
-                            const updatedOutput = {
-                                ...baseOutput,
-                                input: prediction.input || baseOutput.input,
-                                status: prediction.status || baseOutput.status,
-                            }
-
-                            // Si la prédiction a un output, convertissons-le en base64
-                            if (prediction.output) {
-                                try {
-                                    updatedOutput.output = await urlToBase64(prediction.output)
-                                } catch (e) {
-                                    console.error('Error converting output to base64:', e)
-                                }
-                            }
-
-                            console.log('--- Updating output:', {
-                                id: target.id,
-                                oldStatus: baseOutput.status,
-                                newStatus: prediction.status,
-                                hasOutput: !!prediction.output
-                            })
-
-                            this.outputs[index] = updatedOutput
+                        // Créer le nouvel état de l'output
+                        let updatedOutput = {
+                            ...output,
+                            status: prediction.status,
+                            input: prediction.input
                         }
+
+                        // Si on a un output, convertir en base64
+                        if (prediction.output) {
+                            try {
+                                updatedOutput.output = await urlToBase64(prediction.output)
+                            } catch (err) {
+                                console.error('--- Error converting output to base64:', err)
+                            }
+                        }
+
+                        // Mettre à jour l'output dans le store
+                        this.outputs[outputIndex] = updatedOutput
                     }
                 }
             } catch (e) {
