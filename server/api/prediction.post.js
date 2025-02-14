@@ -1,20 +1,18 @@
 export default defineEventHandler(async (event) => {
   try {
-    const body = await readBody(event)
-    console.log('--- Prediction request:', {
-      version: body.version,
-      input: body.input
-    })
+    const { replicate_api_token, model, input } = await readBody(event)
+    console.log('--- Prediction request:', { model, input })
 
     const result = await fetch('https://api.replicate.com/v1/predictions', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${body.replicate_api_token}`,
+        Authorization: `Bearer ${replicate_api_token}`,
         'User-Agent': 'ReFlux/1.0'
       },
       body: JSON.stringify({
-        version: body.version,
-        input: body.input
+        // Utiliser le modèle au lieu de la version
+        version: model, // Replicate s'attend toujours à un champ "version"
+        input
       })
     })
 
