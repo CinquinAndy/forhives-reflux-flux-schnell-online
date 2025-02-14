@@ -8,23 +8,17 @@ const POLL_INTERVAL = 3000
 
 export default {
   name: 'PredictionPoller',
-  setup() {
-    const predictionStore = usePredictionStore()
-
-    // Nettoyer complètement le store au démarrage
-    predictionStore.resetStore()
-
-    return {predictionStore}
-  },
   data: () => ({
     interval: null
   }),
-  computed: mapState(usePredictionStore, ['incompletePredictions']),
+  computed: {
+    ...mapState(usePredictionStore, ['incompletePredictions'])
+  },
   methods: {
     ...mapActions(usePredictionStore, ['pollIncompletePredictions']),
     clearInterval() {
       if (this.interval) {
-        clearInterval(this.interval)
+        window.clearInterval(this.interval)
         this.interval = null
       }
     }
@@ -32,14 +26,13 @@ export default {
   watch: {
     incompletePredictions: {
       immediate: true,
-      handler(incompletePredictions) {
-        if (incompletePredictions.length <= 0) {
-          this.clearInterval()
-          return
-        }
+      handler(predictions) {
+        // Nettoyer l'intervalle existant
+        this.clearInterval()
 
-        if (!this.interval) {
-          this.interval = setInterval(
+        // Si on a des prédictions incomplètes, démarrer le polling
+        if (predictions && predictions.length > 0) {
+          this.interval = window.setInterval(
               this.pollIncompletePredictions,
               POLL_INTERVAL
           )
@@ -48,7 +41,7 @@ export default {
     }
   },
   beforeDestroy() {
-    this.clearinterval()
+    this.clearInterval()
   }
 }
 </script>
