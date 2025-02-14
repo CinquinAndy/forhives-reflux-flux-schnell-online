@@ -6,15 +6,15 @@ export const usePredictionStore = defineStore('predictionStore', {
         outputs: useLocalStorage('reflux-outputs', []),
     }),
     actions: {
-        async createPrediction({version, input}) {
+        async createPrediction({model, input}) {
             try {
-                console.log('--- Creating prediction with:', {version, input})
+                console.log('--- Creating prediction with:', {model, input})
 
                 const prediction = await $fetch('/api/prediction', {
                     method: 'POST',
                     body: {
                         replicate_api_token: this.replicate_api_token,
-                        version,
+                        model,
                         input
                     }
                 })
