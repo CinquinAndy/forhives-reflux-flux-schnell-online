@@ -1,13 +1,13 @@
 <template lang="pug">
-  .relative.border.rounded-lg.overflow-hidden.bg-white.shadow-md.m-2(:class="cardClasses")
-    //- Canvas container
-    .relative(:class="containerClasses")
+  .relative.border.rounded-lg.overflow-hidden.bg-white.shadow-md
+    //- Canvas container avec maintien du ratio
+    .relative(:style="containerStyle")
       #canvas(
         :ref="'canvas-' + output.id"
-        :style="{ width: '100%', height: '100%' }"
+        class="absolute inset-0 w-full h-full"
       )
 
-    //- Download button en overlay
+    //- Download button
     .absolute.top-2.right-2
       u-button(
         @click="downloadImage"
@@ -18,13 +18,13 @@
         :disabled="!output.output || output.status !== 'succeeded'"
       )
 
-    //- Status indicator
+    //- Status
     .absolute.bottom-2.left-2(v-if="output.status !== 'succeeded'")
       u-badge(:color="statusColor") {{ output.status }}
 
     //- Info section
     .p-3.border-t
-      .text-xs.text-gray-500 {{ output.input.prompt }}
+      .text-xs.text-gray-500.truncate(title="output.input.prompt") {{ output.input.prompt }}
       .text-xs.text-gray-400.mt-1 Ratio: {{ output.input.aspect_ratio }}
 </template>
 
@@ -40,6 +40,14 @@ export default {
     }
   },
   computed: {
+    containerStyle() {
+      const [width, height] = this.output.input.aspect_ratio.split(':').map(Number)
+      const paddingPercentage = (height / width) * 100
+      return {
+        paddingBottom: `${paddingPercentage}%`,
+        position: 'relative'
+      }
+    },
     aspectRatio() {
       const [width, height] = this.output.input.aspect_ratio.split(':').map(Number)
       return {width, height}
@@ -97,8 +105,9 @@ export default {
       if (!container) return
 
       // Utiliser les dimensions réelles du conteneur
-      const width = container.offsetWidth
-      const height = container.offsetHeight
+      const rect = container.getBoundingClientRect()
+      const width = rect.width
+      const height = rect.height
 
       this.stage = new Konva.Stage({
         container,
@@ -110,9 +119,10 @@ export default {
       this.stage.add(this.layer)
       this.updateCanvas()
     },
+
     updateCanvas() {
       if (!this.output.output) {
-        // Placeholder avec dimensions adaptées
+        // Placeholder
         const rect = new Konva.Rect({
           width: this.stage.width(),
           height: this.stage.height(),
@@ -134,14 +144,36 @@ export default {
 
         this.layer.add(rect, text)
       } else {
-        // Charger l'image avec dimensions adaptées
+        // Charger l'image en respectant le ratio
         const img = new Image()
         img.onload = () => {
+          const containerSize = this.stage.size()
+          const imageSize = {
+            width: img.width,
+            height: img.height
+          }
+
+          // Calculer les dimensions pour maintenir le ratio
+          const scale = Math.min(
+              containerSize.width / imageSize.width,
+              containerSize.height / imageSize.height
+          )
+
+          const width = imageSize.width * scale
+          const height = imageSize.height * scale
+
+          // Centrer l'image
+          const x = (containerSize.width - width) / 2
+          const y = (containerSize.height - height) / 2
+
           const image = new Konva.Image({
             image: img,
-            width: this.stage.width(),
-            height: this.stage.height()
+            x,
+            y,
+            width,
+            height
           })
+
           this.layer.removeChildren()
           this.layer.add(image)
           this.layer.batchDraw()

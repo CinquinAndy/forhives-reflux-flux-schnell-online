@@ -4,8 +4,8 @@
     .flex.flex-1.overflow-hidden
       ui-left-panel
       .flex-1.p-4.overflow-y-auto
-        //- Grille adaptative avec espacement plus grand
-        .grid.gap-6(class="grid-cols-auto-fit-300")
+        //- Grille avec plus de colonnes
+        .grid.gap-4(class="grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5")
           image-card(
             v-for="output in sortedOutputs"
             :key="output.id"
