@@ -1,13 +1,21 @@
 <template lang="pug"></template>
 
 <script>
-import { mapState, mapActions } from 'pinia'
-import { usePredictionStore } from '~/stores/prediction'
+import {mapState, mapActions} from 'pinia'
+import {usePredictionStore} from '~/stores/prediction'
 
 const POLL_INTERVAL = 3000
 
 export default {
   name: 'PredictionPoller',
+  setup() {
+    const predictionStore = usePredictionStore()
+
+    // Nettoyer complètement le store au démarrage
+    predictionStore.resetStore()
+
+    return {predictionStore}
+  },
   data: () => ({
     interval: null
   }),
@@ -32,8 +40,8 @@ export default {
 
         if (!this.interval) {
           this.interval = setInterval(
-            this.pollIncompletePredictions,
-            POLL_INTERVAL
+              this.pollIncompletePredictions,
+              POLL_INTERVAL
           )
         }
       }

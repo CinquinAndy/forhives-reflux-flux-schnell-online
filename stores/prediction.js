@@ -6,15 +6,28 @@ export const usePredictionStore = defineStore('predictionStore', {
         outputs: useLocalStorage('reflux-outputs', []),
     }),
     actions: {
-        async createPrediction({model, input}) {
-            try {
-                console.log('--- Creating prediction with:', {model, input})
+        // Méthode pour réinitialiser complètement les outputs
+        resetStore() {
+            this.outputs = []
+        },
 
+        // Ajouter une méthode pour nettoyer les outputs invalides
+        cleanupOutputs() {
+            // Filtrer les outputs qui ont des IDs valides
+            this.outputs = this.outputs.filter(output =>
+                output &&
+                output.metadata &&
+                output.metadata.prediction_id &&
+                output.metadata.prediction_id.length > 0
+            )
+        },
+
+        async createPrediction({input}) {  // Retiré model du destructuring
+            try {
                 const prediction = await $fetch('/api/prediction', {
                     method: 'POST',
                     body: {
                         replicate_api_token: this.replicate_api_token,
-                        model,
                         input
                     }
                 })
@@ -37,7 +50,7 @@ export const usePredictionStore = defineStore('predictionStore', {
 
                 // Ajouter aux outputs pour l'affichage
                 const newOutput = {
-                    id: prediction.id,
+                    id: `output-${prediction.id}`,  // Ajout du préfixe
                     status: prediction.status,
                     input: prediction.input,
                     output: null,
@@ -64,23 +77,40 @@ export const usePredictionStore = defineStore('predictionStore', {
         // Pour le polling des résultats
         async pollIncompletePredictions() {
             try {
+                this.cleanupOutputs()
+
                 const prediction_ids = [
                     ...new Set(
                         this.incompletePredictions
                             .map((output) => output?.metadata?.prediction_id || null)
-                            .filter((id) => id)
+                            .filter((id) => id && id.length > 0)
                     )
                 ]
 
-                console.log('--- Polling predictions:', prediction_ids)
+                if (prediction_ids.length === 0) {
+                    return
+                }
 
-                const predictions = await $fetch(
+                console.log('--- Valid prediction IDs for polling:', prediction_ids)
+
+                // Changement ici : stockons la réponse dans une constante avant de l'utiliser
+                const response = await $fetch(
                     `/api/prediction?ids=${prediction_ids.join(',')}&token=${this.replicate_api_token}`
                 )
 
+                if (!response || response.error) {
+                    console.error('--- Polling error:', response?.error || 'No response')
+                    return
+                }
+
+                // Vérifions que response est un tableau
+                const predictions = Array.isArray(response) ? response : [response]
                 console.log('--- Poll response:', predictions)
 
                 for (const prediction of predictions) {
+                    // Vérifions que la prédiction est valide
+                    if (!prediction || !prediction.id) continue
+
                     const targets = this.outputs.filter(
                         (i) => i?.metadata?.prediction_id === prediction.id
                     )
@@ -89,19 +119,32 @@ export const usePredictionStore = defineStore('predictionStore', {
                     for (const target of targets) {
                         const index = this.outputs.findIndex((i) => i.id === target.id)
                         if (index !== -1) {
-                            const baseOutput = this.outputs[index]
+                            // Création d'une copie de l'output existant
+                            const baseOutput = {...this.outputs[index]}
+
+                            // Création du nouvel output avec les données mises à jour
                             const updatedOutput = {
                                 ...baseOutput,
-                                input: prediction.input,
-                                status: prediction.status,
-                                output: prediction.output ? await urlToBase64(prediction.output) : null
+                                input: prediction.input || baseOutput.input,
+                                status: prediction.status || baseOutput.status,
                             }
+
+                            // Si la prédiction a un output, convertissons-le en base64
+                            if (prediction.output) {
+                                try {
+                                    updatedOutput.output = await urlToBase64(prediction.output)
+                                } catch (e) {
+                                    console.error('Error converting output to base64:', e)
+                                }
+                            }
+
                             console.log('--- Updating output:', {
                                 id: target.id,
                                 oldStatus: baseOutput.status,
                                 newStatus: prediction.status,
                                 hasOutput: !!prediction.output
                             })
+
                             this.outputs[index] = updatedOutput
                         }
                     }
@@ -135,7 +178,11 @@ export const usePredictionStore = defineStore('predictionStore', {
     getters: {
         incompletePredictions: (state) =>
             state.outputs.filter(output =>
-                output.status !== 'succeeded' && output.status !== 'failed'
+                output &&
+                output.metadata &&
+                output.metadata.prediction_id &&
+                output.status !== 'succeeded' &&
+                output.status !== 'failed'
             )
     }
 })

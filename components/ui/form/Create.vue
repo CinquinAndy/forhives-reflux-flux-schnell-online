@@ -125,22 +125,30 @@ export default {
       '1:1', '16:9', '21:9', '3:2', '2:3', '4:5',
       '5:4', '3:4', '4:3', '9:16', '9:21'
     ],
-    output_format_options: ['webp', 'jpg', 'png']
+    output_format_options: ['webp', 'jpg', 'png'],
+    // Limiter les steps entre 1 et 4 comme spécifié dans le schéma
+    max_inference_steps: 4,
+    // Limiter le nombre d'outputs entre 1 et 4
+    max_outputs: 4,
+    // Limiter la qualité à 100 maximum
+    max_quality: 100
   }),
   methods: {
     ...mapActions(usePredictionStore, ['createPrediction']),
     async submit() {
       this.loading = true
       try {
+        console.log('--- Starting prediction creation')
         await this.createPrediction({
-          version: "2a247603a9740f7d0c66829258e99bf8dc4b00a66768a44c942c49cdae1627ef", // Version ID de Flux Schnell
           input: {
             prompt: this.prompt,
-            aspect_ratio: this.aspect_ratio,
+            megapixels: "1",
             num_outputs: this.num_outputs,
-            num_inference_steps: this.num_inference_steps,
+            aspect_ratio: this.aspect_ratio,
             output_format: this.output_format,
             output_quality: this.output_quality,
+            num_inference_steps: this.num_inference_steps,
+            go_fast: true
           }
         })
       } catch (e) {
