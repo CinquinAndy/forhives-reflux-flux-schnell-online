@@ -473,34 +473,59 @@ export default {
       )
     },
     updateCanvas() {
-      // Remove .outputs that are not in the outputs array
-      this.layer.find('.output').forEach((group) => {
-        if (!this.outputs.some((output) => output.id === group.id())) {
-          group.destroy()
-        }
-      })
+      // Vérifier que this.layer existe avant de continuer
+      if (!this.layer) {
+        console.warn('Layer not initialized')
+        return
+      }
 
-      // Update or add .outputs for each output
+      // Ajouter une vérification pour s'assurer que outputs existe
+      if (!this.outputs) {
+        console.warn('No outputs available')
+        return
+      }
+
+      // Vérifier que find est disponible avant de l'utiliser
+      const outputs = this.layer.find('.output')
+      if (outputs) {
+        outputs.forEach((group) => {
+          if (!this.outputs.some((output) => output.id === group.id())) {
+            group.destroy()
+          }
+        })
+      }
+
+      // Ajouter des vérifications pour chaque output
       this.outputs.forEach((output) => {
+        if (!output || !output.id) {
+          console.warn('Invalid output:', output)
+          return
+        }
+
         let group = this.stage.findOne(`#${output.id}`)
         if (!group) {
           group = this.createOutput(output)
-          this.layer.add(group)
-          this.updateOutputGroup(group, output)
+          if (group) { // Vérifier que le groupe a été créé
+            this.layer.add(group)
+            this.updateOutputGroup(group, output)
+          }
         } else {
-          // Only update if the shape's properties have changed
           if (this.hasOutputGroupChanged(group, output)) {
             this.updateOutputGroup(group, output)
           }
         }
       })
 
-      // Always move transformer to to after a new shape has been added
-      this.transformer.moveToTop()
+      // Vérifier que transformer existe
+      if (this.transformer) {
+        this.transformer.moveToTop()
+      }
 
       this.layer.batchDraw()
     },
     createOutput(output) {
+      console.log('--- Creating canvas output:', output)
+
       const group = new Konva.Group({
         name: 'output',
         id: output.id,
@@ -592,11 +617,13 @@ export default {
       })
     },
     updateOutputGroup(group, output) {
-      console.log('--- Updating output group:', {
+      console.log('--- Updating canvas output group:', {
         id: output.id,
         status: output.status,
-        hasOutput: !!output.output
+        hasOutput: !!output.output,
+        outputUrl: output.output?.[0]
       })
+
 
       group.setAttrs({
         x: output.metadata.x,
@@ -1122,12 +1149,18 @@ export default {
   },
   mounted() {
     // Create objects
+    if (!this.$refs.canvas) {
+      console.error('Canvas reference not found')
+      return
+    }
+
     this.stage = new Konva.Stage({
       container: this.$refs.canvas,
       width: window.innerWidth,
       height: window.innerHeight,
       draggable: this.tool === 'H'
     })
+
     this.layer = new Konva.Layer()
     this.selection.layer = new Konva.Layer()
     this.transformer = new Konva.Transformer({
@@ -1139,6 +1172,12 @@ export default {
       rotationSnaps: [0, 45, 90, 135, 180, 225, 270, 315]
     })
 
+    // Vérifier que tout est bien initialisé
+    if (!this.stage || !this.layer || !this.transformer) {
+      console.error('Failed to initialize Konva objects')
+      return
+    }
+
     // Init
     this.stage.getContainer().style.backgroundColor = '#f8f8f8'
     this.layer.add(this.transformer)
@@ -1148,18 +1187,21 @@ export default {
     this.loadCanvasState()
     this.updateCanvas()
 
-    // Add event listener for stage changes
-    this.stage.on('wheel', this.handleWheel)
-    this.stage.on('mousedown', this.handleMouseDown)
-    this.stage.on('mousemove', this.handleMouseMove)
-    this.stage.on('mouseup', this.handleMouseUp)
-    this.stage.on('dragend', this.saveCanvasState)
+    // Add event listeners
+    if (this.stage) {
+      this.stage.on('wheel', this.handleWheel)
+      this.stage.on('mousedown', this.handleMouseDown)
+      this.stage.on('mousemove', this.handleMouseMove)
+      this.stage.on('mouseup', this.handleMouseUp)
+      this.stage.on('dragend', this.saveCanvasState)
+    }
 
-    // Add event listeners for transformer
-    this.transformer.on('dragmove', this.handleDragMove)
-    this.transformer.on('dragend', this.handleDragEnd)
+    if (this.transformer) {
+      this.transformer.on('dragmove', this.handleDragMove)
+      this.transformer.on('dragend', this.handleDragEnd)
+    }
 
-    // Update the transformer refs with the actual methods
+    // Update refs
     this.moveTransformerNodesRef = this.moveTransformerNodes.bind(this)
     this.copyTransformerNodesRef = this.copyTransformerNodes.bind(this)
     this.copyTransformerNodesUrlRef = this.copyTransformerNodesUrl.bind(this)
