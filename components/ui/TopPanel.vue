@@ -15,51 +15,51 @@
         | Flux
         u-badge.mx-1.mt-1.float-right(
           class="-rotate-6"
-          color="red"
+          color="orange"
           variant="solid"
-        ) Beta
+        ) By ForHives
 
   //- Control buttons
   .flex-grow.flex.gap-2
-    u-button(
-      @click="tool = 'V'"
-      :color="tool === 'V' ? 'black' : 'white'"
-      icon="i-heroicons-cursor-arrow-rays"
-      size="xs"
-    )
-      | Pointer
-      u-kbd.ml-1 V
-    u-button(
-      @click="tool = 'H'"
-      :color="tool === 'H' ? 'black' : 'white'"
-      icon="i-heroicons-hand-raised"
-      size="xs"
-    )
-      | Drag
-      u-kbd.ml-1 H
-    u-button(
-      v-if="false"
-      @click=""
-      color="white"
-      icon="i-heroicons-pencil"
-      size="xs"
-    )
-      | Sketch
-      u-kbd.ml-1 S
-    u-button(
-      v-if="false"
-      @click=""
-      color="white"
-      icon="i-heroicons-chat-bubble-bottom-center-text"
-      size="xs"
-    )
-      | Text
-      u-kbd.ml-1 T
+    //u-button(
+    //  @click="tool = 'V'"
+    //  :color="tool === 'V' ? 'black' : 'white'"
+    //  icon="i-heroicons-cursor-arrow-rays"
+    //  size="xs"
+    //)
+    //  | Pointer
+    //  u-kbd.ml-1 V
+    //u-button(
+    //  @click="tool = 'H'"
+    //  :color="tool === 'H' ? 'black' : 'white'"
+    //  icon="i-heroicons-hand-raised"
+    //  size="xs"
+    //)
+    //  | Drag
+    //  u-kbd.ml-1 H
+    //u-button(
+    //  v-if="false"
+    //  @click=""
+    //  color="white"
+    //  icon="i-heroicons-pencil"
+    //  size="xs"
+    //)
+    //  | Sketch
+    //  u-kbd.ml-1 S
+    //u-button(
+    //  v-if="false"
+    //  @click=""
+    //  color="white"
+    //  icon="i-heroicons-chat-bubble-bottom-center-text"
+    //  size="xs"
+    //)
+    //  | Text
+    //  u-kbd.ml-1 T
 
   //- Right hand stuff
   .flex.gap-2.px-2
     .text-sm.font-light.content-center
-      | Replicate 
+      | Replicate
       a.underline.underline-offset-4(
         class="decoration-[0.5px] hover:decoration-2"
         href="https://replicate.com/account/api-tokens"
@@ -73,12 +73,12 @@
       placeholder="Replicate API token..."
       trailing
     )
-    u-button(
-      @click="openCode"
-      color="white"
-      icon="i-heroicons-code-bracket"
-      size="xs"
-    ) Code
+    //u-button(
+    //  @click="openCode"
+    //  color="white"
+    //  icon="i-heroicons-code-bracket"
+    //  size="xs"
+    //) Code
 </template>
 
 <script>
