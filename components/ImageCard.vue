@@ -183,14 +183,38 @@ export default {
       this.layer.batchDraw()
     },
     downloadImage() {
-      if (!this.output.output) return
+      if (!this.output.output || !this.output.output[0]) return
 
-      const link = document.createElement('a')
-      link.href = this.output.output
-      link.download = `image-${this.output.id}.${this.output.output.split('.').pop()}`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      const imageData = this.output.output[0]
+      // Vérifier si c'est une donnée base64
+      if (imageData.startsWith('data:')) {
+        // C'est déjà en base64
+        const extension = this.output.input.output_format || 'webp'
+        const link = document.createElement('a')
+        link.href = imageData
+        link.download = `image-${this.output.id}.${extension}`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      } else {
+        // C'est une URL, on doit d'abord la convertir en blob
+        fetch(imageData)
+            .then(response => response.blob())
+            .then(blob => {
+              const url = window.URL.createObjectURL(blob)
+              const link = document.createElement('a')
+              link.href = url
+              const extension = this.output.input.output_format || 'webp'
+              link.download = `image-${this.output.id}.${extension}`
+              document.body.appendChild(link)
+              link.click()
+              document.body.removeChild(link)
+              window.URL.revokeObjectURL(url)
+            })
+            .catch(error => {
+              console.error('Error downloading image:', error)
+            })
+      }
     },
     handleResize() {
       if (!this.stage) return
