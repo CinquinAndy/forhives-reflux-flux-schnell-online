@@ -1,12 +1,12 @@
 export default defineNuxtConfig({
-  compatibilityDate: '2024-04-03',
+  compatibilityDate: '2025-02-15',
   runtimeConfig: {
     public: {}
   },
   devtools: { enabled: false },
   ssr: false,
   nitro: {
-    preset: 'vercel'
+    preset: 'node-server',
   },
   sourcemap: {
     server: false,
@@ -19,7 +19,7 @@ export default defineNuxtConfig({
       },
       title: 'ReFlux',
       link: [
-        { rel: 'canonical', href: 'https://reflux.replicate.dev/' },
+        { rel: 'canonical', href: 'https://reflux.andy-cinquin.fr/' },
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
       ],
       meta: [
@@ -51,13 +51,13 @@ export default defineNuxtConfig({
           hid: 'og:url',
           name: 'og:url',
           property: 'og:url',
-          content: 'https://reflux.replicate.dev'
+          content: 'https://reflux.andy-cinquin.fr'
         },
         {
           hid: 'og:site_name',
           name: 'og:site_name',
           property: 'og:site_name',
-          content: 'reflux.replicate.dev'
+          content: 'reflux.andy-cinquin.fr'
         },
         {
           hid: 'og:title',
@@ -75,7 +75,7 @@ export default defineNuxtConfig({
           hid: 'og:image',
           name: 'og:image',
           property: 'og:image',
-          content: 'https://reflux.replicate.dev/cover.jpg'
+          content: 'https://reflux.andy-cinquin.fr/cover.jpg'
         },
         {
           hid: 'msapplication-TileColor',
@@ -91,7 +91,7 @@ export default defineNuxtConfig({
         {
           hid: 'apple-mobile-web-app-title',
           name: 'apple-mobile-web-app-title',
-          content: 'reflux.replicate.dev'
+          content: 'reflux.andy-cinquin.fr'
         }
       ],
       script: [
