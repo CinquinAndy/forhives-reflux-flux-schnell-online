@@ -198,38 +198,36 @@ export default {
       this.layer.batchDraw()
     },
     downloadImage() {
-      if (!this.output.output || !this.output.output[0]) return
+      if (!this.output.output) return
 
-      const imageData = this.output.output[0]
-      // Vérifier si c'est une donnée base64
-      if (imageData.startsWith('data:')) {
-        // C'est déjà en base64
-        const extension = this.output.input.output_format || 'webp'
-        const link = document.createElement('a')
-        link.href = imageData
-        link.download = `image-${this.output.id}.${extension}`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      } else {
-        // C'est une URL, on doit d'abord la convertir en blob
-        fetch(imageData)
-            .then(response => response.blob())
-            .then(blob => {
-              const url = window.URL.createObjectURL(blob)
-              const link = document.createElement('a')
-              link.href = url
-              const extension = this.output.input.output_format || 'webp'
-              link.download = `image-${this.output.id}.${extension}`
-              document.body.appendChild(link)
-              link.click()
-              document.body.removeChild(link)
-              window.URL.revokeObjectURL(url)
-            })
-            .catch(error => {
-              console.error('Error downloading image:', error)
-            })
-      }
+      // Créer un canvas temporaire pour capturer l'image
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+
+      // Récupérer l'image depuis Konva
+      const konvaStage = this.stage
+      const konvaLayer = this.layer
+
+      // Définir les dimensions du canvas
+      canvas.width = konvaStage.width()
+      canvas.height = konvaStage.height()
+
+      // Dessiner le contenu de Konva sur le canvas
+      const dataURL = konvaStage.toDataURL({
+        pixelRatio: 1,
+        mimeType: `image/${this.output.input.output_format || 'webp'}`,
+        quality: this.output.input.output_quality ? this.output.input.output_quality / 100 : 0.8
+      })
+
+      // Créer le lien de téléchargement
+      const link = document.createElement('a')
+      link.href = dataURL
+      link.download = `image-${this.output.id}.${this.output.input.output_format || 'webp'}`
+
+      // Déclencher le téléchargement
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     },
     handleResize() {
       if (!this.stage) return
