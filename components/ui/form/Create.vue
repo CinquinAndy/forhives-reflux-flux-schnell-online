@@ -138,7 +138,6 @@ export default {
     async submit() {
       this.loading = true
       try {
-        console.log('--- Starting prediction creation')
         await this.createPrediction({
           input: {
             prompt: this.prompt,

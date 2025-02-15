@@ -10,8 +10,6 @@ export default defineEventHandler(async (event) => {
             return {error: 'No valid IDs provided'}
         }
 
-        console.log('--- Polling IDs:', id_array)
-
         const results = await Promise.all(
             id_array.map((id) =>
                 fetch(`https://api.replicate.com/v1/predictions/${id}`, {
@@ -27,8 +25,6 @@ export default defineEventHandler(async (event) => {
         const validPredictions = results.filter(prediction =>
             prediction && !prediction.error && prediction.id
         )
-
-        console.log('--- Valid predictions:', validPredictions)
 
         return validPredictions
     } catch (e) {

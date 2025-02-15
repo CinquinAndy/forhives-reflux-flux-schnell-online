@@ -10,24 +10,28 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
+  "engines": {
+    "node": ">=20.9.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
-    "@nuxt/ui": "^2.18.3",
-    "@pinia/nuxt": "^0.5.2",
-    "@vueuse/core": "^10.11.0",
-    "@vueuse/nuxt": "^10.11.0",
-    "all-the-public-replicate-models": "^1.310.0",
-    "jszip": "^3.10.1",
-    "konva": "^9.3.14",
-    "lodash-es": "^4.17.21",
-    "nuxt": "^3.12.4",
-    "pinia": "^3.0.1",
-    "uuid": "^10.0.0",
-    "vue": "latest"
+    "@nuxt/ui": "2.21.0",
+    "@pinia/nuxt": "0.10.1",
+    "@vueuse/core": "12.6.1",
+    "@vueuse/nuxt": "12.6.1",
+    "all-the-public-replicate-models": "1.382.0",
+    "jszip": "3.10.1",
+    "konva": "9.3.18",
+    "lodash-es": "4.17.21",
+    "nuxt": "3.15.4",
+    "pinia": "3.0.1",
+    "uuid": "11.0.5",
+    "vue": "3.5.13"
   },
   "devDependencies": {
-    "pug": "^3.0.3",
-    "pug-plain-loader": "^1.1.0",
-    "stylus": "^0.63.0",
-    "stylus-loader": "^8.1.0"
+    "pug": "3.0.3",
+    "pug-plain-loader": "1.1.0",
+    "stylus": "0.64.0",
+    "stylus-loader": "8.1.1"
   }
 }
