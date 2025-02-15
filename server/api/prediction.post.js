@@ -1,6 +1,7 @@
 export default defineEventHandler(async (event) => {
     try {
         const {replicate_api_token, input} = await readBody(event)
+        console.log('--- Prediction request:', {input})
 
         const result = await fetch('https://api.replicate.com/v1/predictions', {
             method: 'POST',
@@ -16,6 +17,7 @@ export default defineEventHandler(async (event) => {
         })
 
         const prediction = await result.json()
+        console.log('--- Replicate API response:', prediction)
 
         return prediction
     } catch (e) {

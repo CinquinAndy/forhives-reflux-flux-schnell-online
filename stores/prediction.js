@@ -24,6 +24,8 @@ export const usePredictionStore = defineStore('predictionStore', {
 
         async createPrediction({input}) {
             try {
+                console.log('Creating prediction with input:', input)
+
                 const prediction = await $fetch('/api/prediction', {
                     method: 'POST',
                     body: {
@@ -31,6 +33,8 @@ export const usePredictionStore = defineStore('predictionStore', {
                         input
                     }
                 })
+
+                console.log('Prediction response:', prediction)
 
                 if (prediction.error) {
                     console.error('API Error:', prediction.error)
@@ -42,6 +46,8 @@ export const usePredictionStore = defineStore('predictionStore', {
                 const [width, height] = input.aspect_ratio.split(':').map(Number)
                 const scaledWidth = baseSize
                 const scaledHeight = (height / width) * baseSize
+
+                console.log('Generating outputs for prediction:', prediction.id)
 
                 // Générer autant d'outputs que demandé
                 for (let i = 0; i < input.num_outputs; i++) {
@@ -60,6 +66,8 @@ export const usePredictionStore = defineStore('predictionStore', {
                             height: scaledHeight
                         }
                     }
+
+                    console.log('Adding new output:', newOutput)
                     this.outputs.push(newOutput)
                 }
 
@@ -81,9 +89,14 @@ export const usePredictionStore = defineStore('predictionStore', {
                     )
                 ]
 
+                console.log('Current outputs:', this.outputs)
+                console.log('Incomplete predictions:', this.incompletePredictions)
+
                 if (prediction_ids.length === 0) {
                     return
                 }
+
+                console.log('--- Valid prediction IDs for polling:', prediction_ids)
 
                 const pollUrl = `/api/prediction?ids=${prediction_ids.join(',')}&token=${this.replicate_api_token}`
                 const pollResponse = await $fetch(pollUrl)
@@ -99,17 +112,24 @@ export const usePredictionStore = defineStore('predictionStore', {
                 }
 
                 const predictions = Array.isArray(pollResponse) ? pollResponse : [pollResponse]
+                console.log('--- Poll response:', predictions)
 
                 for (const prediction of predictions) {
                     if (!prediction || !prediction.id) continue
+
+                    console.log(`Processing prediction ${prediction.id}:`, prediction)
 
                     const outputsToUpdate = this.outputs.filter(
                         output => output?.metadata?.prediction_id === prediction.id
                     )
 
+                    console.log('Found outputs to update:', outputsToUpdate)
+
                     for (const output of outputsToUpdate) {
                         const outputIndex = this.outputs.findIndex(o => o.id === output.id)
                         if (outputIndex === -1) continue
+
+                        console.log('Updating output at index', outputIndex, 'with output_index', output.output_index)
 
                         const base = this.outputs[outputIndex]
                         const updatedOutput = {
@@ -122,12 +142,15 @@ export const usePredictionStore = defineStore('predictionStore', {
                             const imageUrl = prediction.output[output.output_index]
                             if (imageUrl) {
                                 try {
+                                    console.log('Converting URL to base64:', imageUrl)
                                     updatedOutput.output = await urlToBase64(imageUrl)
                                 } catch (err) {
                                     console.error('Error converting output to base64:', err)
                                 }
                             }
                         }
+
+                        console.log('Final updated output:', updatedOutput)
                         this.outputs[outputIndex] = updatedOutput
                     }
                 }
