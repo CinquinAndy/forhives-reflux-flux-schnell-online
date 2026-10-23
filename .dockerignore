@@ -1,0 +1,8 @@
+# What `docker build` must not read: dependencies and build output (rebuilt inside the image),
+# the git history, and every local environment file.
+node_modules
+.nuxt
+.output
+.git
+.env
+.env.*
